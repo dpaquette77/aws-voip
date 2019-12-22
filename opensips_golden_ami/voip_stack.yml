@@ -103,6 +103,15 @@ Resources:
           ToPort : 22
           CidrIp: 0.0.0.0/0
 
+  SIPRegistrarDNSRecordset:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z2ZYCU8574UYOA
+      Name: registrar.sip.dpaquette.net.
+      Type: A
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt OpenSipsInstance.PublicIp
 
   OpenSipsInstance:
     Type: AWS::EC2::Instance
@@ -127,12 +136,7 @@ Resources:
       AWS::CloudFormation::Init:
         configSets:
           configure-opensips-config-set:
-            - "cfg_file"
             - "start_opensips"
-
-        cfg_file:
-          sources: 
-            /usr/local/etc/opensips/opensips.cfg: "https://mycloudformation-templates.s3.ca-central-1.amazonaws.com/opensips.cfg" 
 
         start_opensips:
           commands:
