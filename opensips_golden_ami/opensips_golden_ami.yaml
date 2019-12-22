@@ -133,7 +133,6 @@ Resources:
             - "start_opensips"
             - "download_cloudwatch_agent"
             - "install_cloudwatch_agent"
-            - "allow_nonlocalbind"
 
         prereq:
           packages:
@@ -186,10 +185,5 @@ Resources:
             install:
               command: "dpkg -i -E ./amazon-cloudwatch-agent.deb"
               cwd: "/tmp"
-
-        allow_nonlocalbind:
-          commands:
-            set_non_local_bind:
-              command: "echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind"
 
 
