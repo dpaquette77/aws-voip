@@ -4,10 +4,15 @@
   hosts: all
   become: yes
   vars_files: ./vars.yml
-  vars:
-    - public_ip: 15.222.13.128
-    - private_ip: 10.1.1.93
   tasks:
+    - name: register public_ip variable
+      command: "curl http://169.254.169.254/latest/meta-data/public-ipv4"
+      register: public_ip
+
+    - name: register private_ip variable
+      command: "curl http://169.254.169.254/latest/meta-data/local-ipv4"
+      register: private_ip
+
     - name: Apply OpenSIPS template configuration file
       template:
         src: opensips-template.cfg 
