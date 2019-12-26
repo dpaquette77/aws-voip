@@ -1,0 +1,98 @@
+---
+
+- name: "Compile and Install Asterisk {{ asterisk_version }}"
+  hosts: all
+  vars:
+    - asterisk_version: "16.7"
+    - asterisk_src_dir: "/usr/local/src/asterisk-{{ asterisk_version }}"
+    - asterisk_git_repo: "http://gerrit.asterisk.org/asterisk"
+    - opensips_code_url: "https://opensips.org/pub/opensips/{{ opensips_version }}/opensips-{{ opensips_version }}.tar.gz"
+  tasks:
+    - name: install pre-requisite packages
+      apt:
+        name:
+          - build-essential
+          - python
+          - flex
+          - bison
+          - libxml2-dev
+          - libssl-dev
+          - libcurl4-gnutls-dev
+          - uuid-dev
+          - libmysqlclient-dev
+          - libjson-c-dev
+          - ncurses-dev
+          - aptitude-common
+          - libboost-filesystem1.65.1
+          - libboost-iostreams1.65.1
+          - libboost-system1.65.1
+          - libcgi-fast-perl
+          - libcgi-pm-perl
+          - libclass-accessor-perl
+          - libcwidget3v5
+          - libencode-locale-perl
+          - libfcgi-perl
+          - libhtml-parser-perl
+          - libhtml-tagset-perl
+          - libhttp-date-perl
+          - libhttp-message-perl
+          - libio-html-perl
+          - libio-string-perl
+          - liblwp-mediatypes-perl
+          - libparse-debianchangelog-perl
+          - libsigc++-2.0-0v5
+          - libsub-name-perl
+          - libtimedate-perl
+          - liburi-perl
+          - libxapian30
+          - subversion
+          - libedit-dev
+          - libsqlite3-dev
+
+        state: latest
+        update_cache: yes
+
+    - name: Get Asterisk code
+      git: 
+        repo: "{{ asterisk_git_repo }}"
+        dest: "{{ asterisk_src_dir }}"
+        version: "{{ asterisk_version }}"
+
+    - name: run configure
+      shell:
+        cmd: "{{ asterisk_src_dir }}/configure --with-pjproject-bundled" 
+        chdir: "{{ asterisk_src_dir }}"
+
+    - name: install unpackaged dependencies
+      shell:
+        cmd: "{{ asterisk_src_dir }}/contrib/scripts/install_prereq install-unpackaged" 
+
+    - name: copy the menuselect.makeopts file
+      copy:
+        src: menuselect.makeopts
+        dest: "{{ asterisk_src_dir }}"
+
+    - name: "compiling"
+      make:
+        chdir: "{{ asterisk_src_dir }}"
+
+    - name: "installing asterisk"
+      make:
+        chdir: "{{ asterisk_src_dir }}"
+        target: install
+
+    - name: "deploy startup script"
+      make:
+        chdir: "{{ asterisk_src_dir }}"
+        target: samples
+
+    - name: "deploying sample config files"
+      make:
+        chdir: "{{ asterisk_src_dir }}"
+        target: config
+
+
+
+
+
+
