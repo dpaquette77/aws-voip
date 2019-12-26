@@ -2,6 +2,7 @@
 
 - name: Configure OpenSIPS as a public registrar
   hosts: all
+  become: yes
   vars_files: ./vars.yml
   vars:
     - public_ip: 15.222.13.128
