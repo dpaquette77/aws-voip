@@ -14,9 +14,15 @@
       command: "curl http://169.254.169.254/latest/meta-data/public-ipv4"
       register: public_ip
 
+    - set_fact:
+        public_ip = "{{ pubic_ip.stdout }}"
+
     - name: register private_ip variable
       command: "curl http://169.254.169.254/latest/meta-data/local-ipv4"
       register: private_ip
+
+    - set_fact:
+        private_ip = "{{ private_ip.stdout }}"
 
     - name: Apply OpenSIPS template configuration file
       template:
