@@ -1,0 +1,54 @@
+---
+
+- name: Compile and Install OpenSIPS 2.4
+  hosts: all
+  vars:
+    - opensips_version: 2.4.6
+    - opensips_code_url: "https://opensips.org/pub/opensips/{{ opensips_version }}/opensips-{{ opensips_version }}.tar.gz"
+    - src_dir: /usr/local/src
+    - opensips_src_dir: "{{ src_dir }}/opensips-{{ opensips_version }}"
+  tasks:
+    - name: install pre-requisite packages
+      apt:
+        name:
+          - build-essential
+          - python
+          - flex
+          - bison
+          - libxml2-dev
+          - libmemcached-dev
+          - libssl-dev
+          - libhiredis-dev
+          - libcurl4-gnutls-dev
+          - uuid-dev
+          - liblua5.1-0-dev
+          - libmysqlclient-dev
+          - libmicrohttpd-dev
+          - libjson-c-dev
+          - libconfuse-dev
+          - libmongoc-dev
+          - ncurses-dev
+          - libexpat1-dev
+        state: latest
+        update_cache: yes
+
+    - name: Download and unzip source code
+      unarchive: 
+        src: "{{ opensips_code_url }}"
+        dest: "{{ src_dir }}"
+        remote_src: yes
+
+    - name: Compile OpenSIPS
+      make:
+        chdir: "{{ opensips_src_dir }}"
+        target: all
+        params:
+          exclude_modules: 'xcap ldap proto_sctp mmgeoip db_http aaa_radius cgrates snmpstats db_oracle db_berkeley osp db_postgres h350 perl db_sqlite rabbitmq db_perlvdb event_rabbitmq cachedb_couchbase cachedb_cassandra sngtc db_unixodbc'
+
+    - name: Install OpenSIPS
+      make:
+        chdir: "{{ opensips_src_dir }}"
+        target: install
+        params:
+          exclude_modules: 'xcap ldap proto_sctp mmgeoip db_http aaa_radius cgrates snmpstats db_oracle db_berkeley osp db_postgres h350 perl db_sqlite rabbitmq db_perlvdb event_rabbitmq cachedb_couchbase cachedb_cassandra sngtc db_unixodbc'
+
