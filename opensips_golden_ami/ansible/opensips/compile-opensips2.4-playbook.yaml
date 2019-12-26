@@ -2,6 +2,7 @@
 
 - name: Compile and Install OpenSIPS 2.4
   hosts: all
+  become: yes
   vars:
     - opensips_version: 2.4.6
     - opensips_code_url: "https://opensips.org/pub/opensips/{{ opensips_version }}/opensips-{{ opensips_version }}.tar.gz"
