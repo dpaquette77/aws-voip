@@ -3,7 +3,12 @@
 - name: Configure OpenSIPS as a public registrar
   hosts: all
   become: yes
-  vars_files: ./vars.yml
+  vars:
+    - dbhost: voip.cluster-cspiusdu7opc.ca-central-1.rds.amazonaws.com
+    - dbname: opensips
+    - dbusername: opensips
+    - dbpassword: blablabla
+
   tasks:
     - name: register public_ip variable
       command: "curl http://169.254.169.254/latest/meta-data/public-ipv4"
