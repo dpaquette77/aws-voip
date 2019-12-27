@@ -1,0 +1,51 @@
+---
+Resources:
+
+  SSHFromAnywhereSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-stack:MyVPC
+      GroupDescription: Allow SIP from anywhere
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort : 22
+          ToPort : 22
+          CidrIp: 0.0.0.0/0
+
+  AsteriskGoldenInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ba5191a708339a31
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !Ref SSHFromAnywhereSG
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            apt-get update -y
+            apt-get install -y build-essential python flex bison libxml2-dev libssl-dev libcurl4-gnutls-dev uuid-dev libmysqlclient-dev libjson-c-dev ncurses-dev aptitude-common libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-system1.65.1 libcgi-fast-perl libcgi-pm-perl libclass-accessor-perl libcwidget3v5 libencode-locale-perl libfcgi-perl libhtml-parser-perl libhtml-tagset-perl libhttp-date-perl libhttp-message-perl libio-html-perl libio-string-perl liblwp-mediatypes-perl libparse-debianchangelog-perl libsigc++-2.0-0v5 libsub-name-perl libtimedate-perl liburi-perl libxapian30 subversion libedit-dev libsqlite3-dev
+            git clone -b 16.6 https://github.com/asterisk/asterisk.git /usr/local/src//asterisk-16.6
+            (cd /usr/local/src/asterisk-16.6 && ./configure --with-pjproject-bundled && contrib/scripts/install_prereq install-unpackaged && make && make install && make config && make samples)
+
+            apt-get -y install python-pip
+            pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+            /usr/local/bin/cfn-init -s ${AWS::StackId} -r AsteriskGoldenInstance --region ca-central-1 -c -config-set
+
+
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          configure_cloudwatch_agent:
+            - "deploy_config_file"
+
+        deploy_config_file:
+
+
+
+
+
+
+
