@@ -49,7 +49,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: ca-central-1a
-      CidrBlock: 10.2.0.0/24
+      CidrBlock: 10.1.6.0/24
       MapPublicIpOnLaunch: true
       VpcId: !Ref VoipVPCParameter
 
@@ -57,7 +57,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: ca-central-1b
-      CidrBlock: 10.2.1.0/24
+      CidrBlock: 10.1.7.0/24
       MapPublicIpOnLaunch: true
       VpcId: !Ref VoipVPCParameter
 
@@ -65,7 +65,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: ca-central-1a
-      CidrBlock: 10.2.2.0/24
+      CidrBlock: 10.1.8.0/24
       MapPublicIpOnLaunch: false
       VpcId: !Ref VoipVPCParameter
 
@@ -73,7 +73,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: ca-central-1b
-      CidrBlock: 10.2.3.0/24
+      CidrBlock: 10.1.9.0/24
       MapPublicIpOnLaunch: false
       VpcId: !Ref VoipVPCParameter
 
@@ -105,15 +105,13 @@ Resources:
           ToPort : 22
           CidrIp: 0.0.0.0/0
 
-  SIPRegistrarDNSRecordset:
-    Type: AWS::Route53::RecordSet
+  OpenSipsInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
     Properties:
-      HostedZoneId: Z2ZYCU8574UYOA
-      Name: registrar.sip.dpaquette.net.
-      Type: A
-      TTL: 300
-      ResourceRecords:
-        - !GetAtt OpenSipsInstance.PublicIp
+      InstanceProfileName: OpenSipsProfileName
+      Path: /
+      Roles:
+        - admin_for_ec2
 
   OpenSipsInstance:
     Type: AWS::EC2::Instance
@@ -122,6 +120,8 @@ Resources:
       InstanceType: t2.micro
       SubnetId: !Ref PublicSubnetA
       KeyName: 2020key
+      IamInstanceProfile: !Ref OpenSipsInstanceProfile
+
       SecurityGroupIds:
         - !Ref SipSignalingFromAnywhereSG
         - !Ref SSHFromAnywhereSG
@@ -138,7 +138,19 @@ Resources:
       AWS::CloudFormation::Init:
         configSets:
           configure-opensips-config-set:
-            - "start_opensips"
+            - "configure_opensips"
+
+        configure_opensips:
+          files:
+            /usr/local/etc/opensips/opensips.cfg:
+              source: https://mycloudformation-templates.s3.ca-central-1.amazonaws.com/opensips-template.cfg
+              context:
+                dbhost: '{{resolve:ssm:opensips-registrar-db-host:1}}'
+                dbname: '{{resolve:ssm:opensips-registrar-db-name:1}}'
+                dbpassword: '{{resolve:secretsmanager:mypassword:SecretString:password:1}}'
+                dbusername: '{{resolve:ssm:opensips-registrar-db-username:1}}'
+
+
 
         start_opensips:
           commands:
