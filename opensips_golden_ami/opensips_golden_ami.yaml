@@ -36,6 +36,9 @@ Resources:
         configSets:
           install-opensips-config-set:
             - "prereq"
+            - "compile_opensips"
+            - "install_opensips"
+            - "start_opensips"
             - "download_cloudwatch_agent"
             - "install_cloudwatch_agent"
 
