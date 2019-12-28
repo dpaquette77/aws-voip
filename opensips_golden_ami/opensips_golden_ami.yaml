@@ -63,6 +63,23 @@ Resources:
           sources: 
             /usr/src: "https://opensips.org/pub/opensips/2.4.6/opensips-2.4.6.tar.gz"
 
+        compile_opensips:
+          commands:
+            compile:
+              command: "make all exclude_modules='xcap ldap proto_sctp mmgeoip db_http aaa_radius cgrates snmpstats db_oracle db_berkeley osp db_postgres h350 perl db_sqlite rabbitmq db_perlvdb event_rabbitmq cachedb_couchbase cachedb_cassandra sngtc db_unixodbc'"
+              cwd: "/usr/src/opensips-2.4.6"
+
+        install_opensips:
+          commands:
+            install:
+              command: "make install exclude_modules='xcap ldap proto_sctp mmgeoip db_http aaa_radius cgrates snmpstats db_oracle db_berkeley osp db_postgres h350 perl db_sqlite rabbitmq db_perlvdb event_rabbitmq cachedb_couchbase cachedb_cassandra sngtc db_unixodbc'"
+              cwd: "/usr/src/opensips-2.4.6"
+
+        start_opensips:
+          commands:
+            start:
+              command: "/usr/local/sbin/opensipsctl start"
+
 
         download_cloudwatch_agent:
           commands:
