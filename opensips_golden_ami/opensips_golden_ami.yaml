@@ -1,0 +1,83 @@
+---
+Resources:
+
+  SSHFromAnywhereSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-stack:MyVPC
+      GroupDescription: Allow SIP from anywhere
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort : 22
+          ToPort : 22
+          CidrIp: 0.0.0.0/0
+
+
+  OpenSipsGoldenInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ba5191a708339a31
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !Ref SSHFromAnywhereSG
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            apt-get update -y
+            apt-get -y install python-pip
+            pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+            /usr/local/bin/cfn-init -s ${AWS::StackId} -r OpenSipsGoldenInstance --region ca-central-1 -c install-opensips-config-set
+
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          install-opensips-config-set:
+            - "prereq"
+            - "download_cloudwatch_agent"
+            - "install_cloudwatch_agent"
+
+        prereq:
+          packages:
+            apt:
+              build-essential: []
+              flex: []
+              bison: []
+              libxml2-dev: []
+              libmemcached-dev: []
+              libssl-dev: []
+              libhiredis-dev: []
+              libcurl4-gnutls-dev: []
+              uuid-dev: []
+              liblua5.1-0-dev: []
+              libmysqlclient-dev: []
+              libmicrohttpd-dev: []
+              libjson-c-dev: []
+              libconfuse-dev: []
+              libmongoc-dev: []
+              ncurses-dev: []
+              collectd: []
+
+          sources: 
+            /usr/src: "https://opensips.org/pub/opensips/2.4.6/opensips-2.4.6.tar.gz"
+
+
+        download_cloudwatch_agent:
+          commands:
+            download:
+              command: "wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
+              cwd: "/tmp"
+
+        install_cloudwatch_agent:
+          commands:
+            install:
+              command: "dpkg -i -E ./amazon-cloudwatch-agent.deb"
+              cwd: "/tmp"
+            get_cfg_file:
+              command: "(cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d && wget https://raw.githubusercontent.com/dpaquette77/aws-voip/dev/asterisk_golden_ami/config.json)"
+            enable:
+              command: "systemctl enable amazon-cloudwatch-agent"
+
+
