@@ -30,7 +30,7 @@ Resources:
             git clone -b 16.6 https://github.com/asterisk/asterisk.git /usr/local/src//asterisk-16.6
             (cd /usr/local/src/asterisk-16.6 && ./configure --with-pjproject-bundled && contrib/scripts/install_prereq install-unpackaged && make && make install && make config && make samples)
 
-            (cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d && wget https://raw.githubusercontent.com/dpaquette77/aws-voip/dev/asterisk_golden_ami/config.json)
+            (cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d && wget https://raw.githubusercontent.com/dpaquette77/aws-voip/dev/asterisk_golden_ami/config.json && mv config.json default)
 
             apt-get install -y collectd
 
