@@ -69,6 +69,7 @@
 
     - name: copy the menuselect.makeopts file
       copy:
+
         src: menuselect.makeopts
         dest: "{{ asterisk_src_dir }}"
 
