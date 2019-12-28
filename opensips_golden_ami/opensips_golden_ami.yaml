@@ -96,7 +96,7 @@ Resources:
               command: "dpkg -i -E ./amazon-cloudwatch-agent.deb"
               cwd: "/tmp"
             get_cfg_file:
-              command: "(cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d && wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/opensips_golden_ami/config.json)"
+              command: "(cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d && wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/opensips_golden_ami/config.json && mv config.json default)"
             enable:
               command: "systemctl enable amazon-cloudwatch-agent"
 
