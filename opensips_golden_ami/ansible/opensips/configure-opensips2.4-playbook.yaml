@@ -8,21 +8,23 @@
     - dbname: opensips
     - dbusername: opensips
     - dbpassword: blablabla
+    - public_ip: ""
+    - private_ip: ""
 
   tasks:
     - name: register public_ip variable
       command: "curl http://169.254.169.254/latest/meta-data/public-ipv4"
-      register: public_ip
+      register: public_ip_cmd
 
     - set_fact:
-        public_ip = "{{ pubic_ip.stdout }}"
+        public_ip = "{{ public_ip_cmd.stdout }}"
 
     - name: register private_ip variable
       command: "curl http://169.254.169.254/latest/meta-data/local-ipv4"
-      register: private_ip
+      register: private_ip_cmd
 
     - set_fact:
-        private_ip = "{{ private_ip.stdout }}"
+        private_ip = "{{ private_ip_cmd.stdout }}"
 
     - name: Apply OpenSIPS template configuration file
       template:
