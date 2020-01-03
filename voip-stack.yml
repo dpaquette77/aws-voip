@@ -27,7 +27,7 @@ Resources:
   SIPFromAnywhereSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !ImportValue vpc-stack:MyVPC
+      VpcId: !ImportValue vpc-layer:MyVPC
       GroupDescription: Allow SIP from anywhere
       SecurityGroupIngress:
         - IpProtocol: udp
@@ -40,7 +40,7 @@ Resources:
     Properties:
       ImageId: ami-056158f9b1df295ce
       InstanceType: t2.micro
-      SubnetId: !ImportValue vpc-stack:PublicSubnet1
+      SubnetId: !ImportValue vpc-layer:PublicSubnet1
       KeyName: 2020key
       SecurityGroupIds:
         - !Ref SIPFromAnywhereSG
