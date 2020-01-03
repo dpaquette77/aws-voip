@@ -15,6 +15,7 @@ Resources:
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - arn:aws:iam::aws:policy/CloudWatchFullAccess
       Path: "/"
       RoleName: AutomationServiceRole
 
