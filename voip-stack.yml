@@ -14,6 +14,7 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
+      - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Path: "/"
       RoleName: AutomationServiceRole
 
@@ -24,7 +25,7 @@ Resources:
       Roles:
         - !Ref AutomationServiceRole
 
-  SIPFromAnywhereSG:
+  SipRegistrarSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !ImportValue vpc-layer:MyVPC
@@ -43,6 +44,42 @@ Resources:
       SubnetId: !ImportValue vpc-layer:PublicSubnet1
       KeyName: 2020key
       SecurityGroupIds:
-        - !Ref SIPFromAnywhereSG
+        - !Ref SipRegistrarSG
+      IamInstanceProfile: !Ref OpenSipsInstanceProfile
+
+
+
+  MediaServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole
+
+  MediaServerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-layer:MyVPC
+      GroupDescription: Allow SIP from registrar, rtp from media gateway
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          FromPort : 5060
+          ToPort : 5060
+          SourceSecurityGroupId: !Ref SipRegistrarSG
+        - IpProtocol: udp
+          FromPort : 10000
+          ToPort : 30000
+          SourceSecurityGroupId: !Ref SipRegistrarSG
+
+  MediaServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-008b9d1c9214fc412
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-layer:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !Ref MediaServerSG
+      IamInstanceProfile: !Ref MediaServerInstanceProfile
 
 
