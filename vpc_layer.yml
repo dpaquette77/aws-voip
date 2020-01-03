@@ -1,0 +1,132 @@
+---
+Parameters:
+  AvailabilityZone1Parameter:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Availability zone 1
+    
+  AvailabilityZone2Parameter:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Availability zone 2
+    
+Resources:
+  MyIGW:
+    Type: AWS::EC2::InternetGateway
+
+  MyIGWAttachement:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyIGW
+
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.10.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: True
+      InstanceTenancy: default
+
+  PubSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1Parameter
+      CidrBlock: 10.10.0.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref MyVPC
+
+  PubSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2Parameter
+      CidrBlock: 10.10.1.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref MyVPC
+
+  PrivSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1Parameter
+      CidrBlock: 10.10.2.0/24
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref MyVPC
+
+  PrivSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2Parameter
+      CidrBlock: 10.10.3.0/24
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref MyVPC
+
+  RouteToIGW:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyIGW
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  PublicRTSubnetAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PubSubnet1
+
+  PublicRTSubnetAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PubSubnet2
+
+  PrivateRTSubnetAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivSubnet1
+
+  PrivateRTSubnetAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivSubnet2
+
+Outputs:
+  VpcIdOutput:
+    Description: VPC ID that was created
+    Value: !Ref MyVPC
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", MyVPC ] ]
+
+  PubSubId1Output:
+    Description: id of public subnet 1
+    Value: !Ref PubSubnet1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet1 ] ]
+
+  PubSubId2Output:
+    Description: id of public subnet 2
+    Value: !Ref PubSubnet2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet2 ] ]
+
+  PrivateSubId1Output:
+    Description: id of private subnet 1
+    Value: !Ref PrivSubnet1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivSubnet1 ] ]
+
+  PrivateSubId2Output:
+    Description: id of private subnet 2
+    Value: !Ref PrivSubnet2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivSubnet2 ] ]
+
