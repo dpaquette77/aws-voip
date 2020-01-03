@@ -1,0 +1,48 @@
+---
+Resources:
+  AutomationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
+      Path: "/"
+      RoleName: AutomationServiceRole
+
+  OpenSipsInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole
+
+  SIPFromAnywhereSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-stack:MyVPC
+      GroupDescription: Allow SIP from anywhere
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          FromPort : 5060
+          ToPort : 5060
+          CidrIp: 0.0.0.0/0
+
+  OpenSipsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-056158f9b1df295ce
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !Ref SIPFromAnywhereSG
+
+
