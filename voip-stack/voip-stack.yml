@@ -48,6 +48,16 @@ Resources:
           ToPort : 5060
           CidrIp: 0.0.0.0/0
 
+  SipRegistrarDnsRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z2ZYCU8574UYOA
+      Name: sip.dpaquette.net
+      Type: A
+      TTL: 60
+      ResourceRecords:
+        - !GetAtt OpenSipsInstance.PublicIp
+
   OpenSipsInstance:
     Type: AWS::EC2::Instance
     Properties:
