@@ -26,6 +26,17 @@ Resources:
       Roles:
         - !Ref AutomationServiceRole
 
+  SSHFromAnywhereSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-stack:MyVPC
+      GroupDescription: Allow SIP from anywhere
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort : 22
+          ToPort : 22
+          CidrIp: 0.0.0.0/0
+
   SipRegistrarSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -46,6 +57,7 @@ Resources:
       KeyName: 2020key
       SecurityGroupIds:
         - !Ref SipRegistrarSG
+        - !Ref SSHFromAnywhereSG
       IamInstanceProfile: !Ref OpenSipsInstanceProfile
 
 
@@ -81,6 +93,44 @@ Resources:
       KeyName: 2020key
       SecurityGroupIds:
         - !Ref MediaServerSG
+        - !Ref SSHFromAnywhereSG
       IamInstanceProfile: !Ref MediaServerInstanceProfile
 
 
+
+
+  RTPGatewayInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole
+
+  RTPGatewaySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue vpc-layer:MyVPC
+      GroupDescription: Allow RTP from anywhere
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          FromPort : 10000
+          ToPort : 30000
+          CidrIp: 0.0.0.0/0
+
+  RTPGatewayInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ba5191a708339a31
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-layer:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !Ref RTPGatewaySG
+        - !Ref SSHFromAnywhereSG
+      IamInstanceProfile: !Ref RTPGatewayInstanceProfile
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            apt-get update -y
+            apt-get -y install rtpproxy
