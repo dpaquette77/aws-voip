@@ -67,6 +67,8 @@ Resources:
             wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/opensips.cfg -O /usr/local/etc/opensips/opensips.cfg
             wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/configure_opensips_db_url.py -O /tmp/configure_opensips_db_url.py
             python /tmp/configure_opensips_db_url.py
+            sed -i "s/PUBLIC_IP/`curl http://169.254.169.254/latest/meta-data/public-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
+            sed -i "s/PRIVATE_IP/`curl http://169.254.169.254/latest/meta-data/local-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
 
 
 
