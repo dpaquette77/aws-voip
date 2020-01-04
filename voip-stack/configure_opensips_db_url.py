@@ -16,8 +16,6 @@ db_username = ssm.get_parameter(Name='opensips-registrar-db-username')
 db_password = ssm.get_parameter(Name='opensips-registrar-db-password',
         WithDecryption=True)
 
-print db_host['Parameter']['Value'], db_name['Parameter']['Value'], db_username['Parameter']['Value'], db_password['Parameter']['Value']
-
 config_file = open(CONFIG_FILEPATH, "rt")
 config_file_text = config_file.read()
 config_file_text_new = config_file_text.replace(DB_HOST_PLACEHOLDER,
