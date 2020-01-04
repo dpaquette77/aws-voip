@@ -29,7 +29,7 @@ Resources:
   SSHFromAnywhereSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !ImportValue vpc-stack:MyVPC
+      VpcId: !ImportValue vpc-layer:MyVPC
       GroupDescription: Allow SIP from anywhere
       SecurityGroupIngress:
         - IpProtocol: tcp
