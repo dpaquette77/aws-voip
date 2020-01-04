@@ -59,6 +59,11 @@ Resources:
         - !Ref SipRegistrarSG
         - !Ref SSHFromAnywhereSG
       IamInstanceProfile: !Ref OpenSipsInstanceProfile
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/opensips.cfg -O /usr/local/etc/opensips/opensips.cfg
 
 
 
