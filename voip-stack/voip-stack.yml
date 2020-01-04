@@ -61,7 +61,7 @@ Resources:
   OpenSipsInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-056158f9b1df295ce
+      ImageId: '{{resolve:ssm:opensips-registrar-ami-latest}}'
       InstanceType: t2.micro
       SubnetId: !ImportValue vpc-layer:PublicSubnet1
       KeyName: 2020key
@@ -108,7 +108,7 @@ Resources:
   MediaServerInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-008b9d1c9214fc412
+      ImageId: '{{resolve:ssm:asterisk-ami-latest}}'
       InstanceType: t2.micro
       SubnetId: !ImportValue vpc-layer:PublicSubnet1
       KeyName: 2020key
