@@ -63,7 +63,10 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash -xe
+            pip install boto3
             wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/opensips.cfg -O /usr/local/etc/opensips/opensips.cfg
+            wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/configure_opensips_db_url.py -O /tmp/configure_opensips_db_url.py
+            python /tmp/configure_opensips_db_url.py
 
 
 
