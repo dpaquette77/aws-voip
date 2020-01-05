@@ -54,7 +54,7 @@ Resources:
         - IpProtocol: udp
           FromPort : 10000
           ToPort : 30000
-          SourceSecurityGroupId: !Ref SipRegistrarSG
+          SourceSecurityGroupId: !Ref RTPGatewaySG
 
   RTPGatewaySG:
     Type: AWS::EC2::SecurityGroup
@@ -66,6 +66,10 @@ Resources:
           FromPort : 10000
           ToPort : 30000
           CidrIp: 0.0.0.0/0
+        - IpProtocol: udp
+          FromPort : 10000
+          ToPort : 30000
+          SourceSecurityGroupId: !Ref MediaServerSG
 
 
 Outputs:
