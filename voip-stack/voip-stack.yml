@@ -1,52 +1,11 @@
 ---
 Resources:
-  AutomationServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - ssm.amazonaws.com
-            - ec2.amazonaws.com
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
-      - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-      - arn:aws:iam::aws:policy/CloudWatchFullAccess
-      Path: "/"
-      RoleName: AutomationServiceRole
-
   OpenSipsInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Path: /
       Roles:
-        - !Ref AutomationServiceRole
-
-  SSHFromAnywhereSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !ImportValue vpc-layer:MyVPC
-      GroupDescription: Allow SIP from anywhere
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort : 22
-          ToPort : 22
-          CidrIp: 0.0.0.0/0
-
-  SipRegistrarSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !ImportValue vpc-layer:MyVPC
-      GroupDescription: Allow SIP from anywhere
-      SecurityGroupIngress:
-        - IpProtocol: udp
-          FromPort : 5060
-          ToPort : 5060
-          CidrIp: 0.0.0.0/0
+        - !ImportValue security-stack:AutomationServiceRole 
 
   SipRegistrarDnsRecordSet:
     Type: AWS::Route53::RecordSet
@@ -61,13 +20,13 @@ Resources:
   OpenSipsInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: '{{resolve:ssm:opensips-registrar-ami-latest}}'
+      ImageId: '{{resolve:ssm:opensips-registrar-ami-latest:1}}'
       InstanceType: t2.micro
-      SubnetId: !ImportValue vpc-layer:PublicSubnet1
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
       KeyName: 2020key
       SecurityGroupIds:
-        - !Ref SipRegistrarSG
-        - !Ref SSHFromAnywhereSG
+        - !ImportValue security-stack:SipRegistrarSG
+        - !ImportValue security-stack:SSHFromAnywhereSG
       IamInstanceProfile: !Ref OpenSipsInstanceProfile
       UserData:
         Fn::Base64:
@@ -88,66 +47,38 @@ Resources:
     Properties:
       Path: /
       Roles:
-        - !Ref AutomationServiceRole
+        - !ImportValue security-stack:AutomationServiceRole
 
-  MediaServerSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !ImportValue vpc-layer:MyVPC
-      GroupDescription: Allow SIP from registrar, rtp from media gateway
-      SecurityGroupIngress:
-        - IpProtocol: udp
-          FromPort : 5060
-          ToPort : 5060
-          SourceSecurityGroupId: !Ref SipRegistrarSG
-        - IpProtocol: udp
-          FromPort : 10000
-          ToPort : 30000
-          SourceSecurityGroupId: !Ref SipRegistrarSG
 
   MediaServerInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: '{{resolve:ssm:asterisk-ami-latest}}'
+      ImageId: '{{resolve:ssm:asterisk-ami-latest:1}}'
       InstanceType: t2.micro
-      SubnetId: !ImportValue vpc-layer:PublicSubnet1
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
       KeyName: 2020key
       SecurityGroupIds:
-        - !Ref MediaServerSG
-        - !Ref SSHFromAnywhereSG
+        - !ImportValue security-stack:MediaServerSG
+        - !ImportValue security-stack:SSHFromAnywhereSG
       IamInstanceProfile: !Ref MediaServerInstanceProfile
-
-
-
 
   RTPGatewayInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Path: /
       Roles:
-        - !Ref AutomationServiceRole
-
-  RTPGatewaySG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !ImportValue vpc-layer:MyVPC
-      GroupDescription: Allow RTP from anywhere
-      SecurityGroupIngress:
-        - IpProtocol: udp
-          FromPort : 10000
-          ToPort : 30000
-          CidrIp: 0.0.0.0/0
+        - !ImportValue security-stack:AutomationServiceRole
 
   RTPGatewayInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-0ba5191a708339a31
       InstanceType: t2.micro
-      SubnetId: !ImportValue vpc-layer:PublicSubnet1
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
       KeyName: 2020key
       SecurityGroupIds:
-        - !Ref RTPGatewaySG
-        - !Ref SSHFromAnywhereSG
+        - !ImportValue security-stack:RTPGatewaySG
+        - !ImportValue security-stack:SSHFromAnywhereSG
       IamInstanceProfile: !Ref RTPGatewayInstanceProfile
       UserData:
         Fn::Base64:
