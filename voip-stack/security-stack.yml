@@ -1,5 +1,26 @@
 ---
 Resources:
+  OpenSipsInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole 
+
+  MediaServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole
+
+  RTPGatewayInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AutomationServiceRole
+
   AutomationServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -66,10 +87,10 @@ Resources:
           FromPort : 10000
           ToPort : 30000
           CidrIp: 0.0.0.0/0
-        - IpProtocol: udp
-          FromPort : 10000
-          ToPort : 30000
-          SourceSecurityGroupId: !Ref MediaServerSG
+          #    - IpProtocol: udp
+          #FromPort : 10000
+          #ToPort : 30000
+          #SourceSecurityGroupId: !Ref MediaServerSG
 
 
 Outputs:
@@ -103,5 +124,24 @@ Outputs:
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", RTPGatewaySG ] ]
       #      Name: "security-stack:RTPGatewaySG"
+      #
+  OpenSipsInstanceProfile:
+    Description: Opensips instance profile
+    Value: !Ref OpenSipsInstanceProfile
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", OpenSipsInstanceProfile ] ]
+
+  MediaServerInstanceProfile:
+    Description: asterisk instance profile
+    Value: !Ref MediaServerInstanceProfile
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", MediaServerInstanceProfile] ]
+
+  RTPGatewayInstanceProfile:
+    Description: rtpproxy instance profile
+    Value: !Ref RTPGatewayInstanceProfile
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", RTPGatewayInstanceProfile] ]
+
 
 

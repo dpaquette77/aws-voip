@@ -1,11 +1,5 @@
 ---
 Resources:
-  OpenSipsInstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      Path: /
-      Roles:
-        - !ImportValue security-stack:AutomationServiceRole 
 
   SipRegistrarDnsRecordSet:
     Type: AWS::Route53::RecordSet
@@ -27,7 +21,7 @@ Resources:
       SecurityGroupIds:
         - !ImportValue security-stack:SipRegistrarSG
         - !ImportValue security-stack:SSHFromAnywhereSG
-      IamInstanceProfile: !Ref OpenSipsInstanceProfile
+      IamInstanceProfile: !ImportValue security-stack:OpenSipsInstanceProfile
       UserData:
         Fn::Base64:
           !Sub |
@@ -38,16 +32,10 @@ Resources:
             python /tmp/configure_opensips_db_url.py
             sed -i "s/PUBLIC_IP/`curl http://169.254.169.254/latest/meta-data/public-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/PRIVATE_IP/`curl http://169.254.169.254/latest/meta-data/local-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
+            sed -i "s/TESTING/${RTPGatewayInstance.PrivateIp}/g" /usr/local/etc/opensips/opensips.cfg
+            sed -i "s/RTPPROXY_PORT/7722/g" /usr/local/etc/opensips/opensips.cfg
             /usr/local/sbin/opensipsctl start
 
-
-
-  MediaServerInstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      Path: /
-      Roles:
-        - !ImportValue security-stack:AutomationServiceRole
 
 
   MediaServerInstance:
@@ -60,14 +48,8 @@ Resources:
       SecurityGroupIds:
         - !ImportValue security-stack:MediaServerSG
         - !ImportValue security-stack:SSHFromAnywhereSG
-      IamInstanceProfile: !Ref MediaServerInstanceProfile
+      IamInstanceProfile: !ImportValue security-stack:MediaServerInstanceProfile
 
-  RTPGatewayInstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      Path: /
-      Roles:
-        - !ImportValue security-stack:AutomationServiceRole
 
   RTPGatewayInstance:
     Type: AWS::EC2::Instance
@@ -79,7 +61,7 @@ Resources:
       SecurityGroupIds:
         - !ImportValue security-stack:RTPGatewaySG
         - !ImportValue security-stack:SSHFromAnywhereSG
-      IamInstanceProfile: !Ref RTPGatewayInstanceProfile
+      IamInstanceProfile: !ImportValue security-stack:RTPGatewayInstanceProfile
       UserData:
         Fn::Base64:
           !Sub |
