@@ -34,7 +34,7 @@ Resources:
             sed -i "s/PRIVATE_IP/`curl http://169.254.169.254/latest/meta-data/local-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/RTPPROXY_IP/${RTPGatewayInstance.PrivateIp}/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/RTPPROXY_PORT/7722/g" /usr/local/etc/opensips/opensips.cfg
-            sed -i "s/ASTERISK_IP/${OpenSipsInstance.PrivateIp}/g" /usr/local/etc/opensips/opensips.cfg
+            sed -i "s/ASTERISK_IP/media.internal/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/ASTERISK_SIP_PORT/5060/g" /usr/local/etc/opensips/opensips.cfg
             /usr/local/sbin/opensipsctl start
 
@@ -79,3 +79,6 @@ Resources:
             #!/bin/bash -xe
             apt-get update -y
             apt-get -y install rtpproxy
+            systemctl disable rtpproxy
+            systemctl stop rtpproxy
+            rtpproxy -l `curl http://169.254.169.254/latest/meta-data/local-ipv4` -s udp:`curl http://169.254.169.254/latest/meta-data/local-ipv4`:7722 -m 10000 -M 30000 -u rtpproxy rtpproxy
