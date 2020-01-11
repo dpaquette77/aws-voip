@@ -32,7 +32,7 @@ Resources:
             python /tmp/configure_opensips_db_url.py
             sed -i "s/PUBLIC_IP/`curl http://169.254.169.254/latest/meta-data/public-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/PRIVATE_IP/`curl http://169.254.169.254/latest/meta-data/local-ipv4`/g" /usr/local/etc/opensips/opensips.cfg
-            sed -i "s/TESTING/${RTPGatewayInstance.PrivateIp}/g" /usr/local/etc/opensips/opensips.cfg
+            sed -i "s/RTPPROXY_IP/${RTPGatewayInstance.PrivateIp}/g" /usr/local/etc/opensips/opensips.cfg
             sed -i "s/RTPPROXY_PORT/7722/g" /usr/local/etc/opensips/opensips.cfg
             /usr/local/sbin/opensipsctl start
 
@@ -49,6 +49,15 @@ Resources:
         - !ImportValue security-stack:MediaServerSG
         - !ImportValue security-stack:SSHFromAnywhereSG
       IamInstanceProfile: !ImportValue security-stack:MediaServerInstanceProfile
+
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/sip.conf -O /etc/asterisk/sip.conf
+            wget https://raw.githubusercontent.com/dpaquette77/aws-voip/master/voip-stack/extensions.conf -O /etc/asterisk/extensions.conf
+            sed -i "s/OPENSIPS_IP/${OpenSipsInstance.PrivateIp}/g" /etc/asterisk/extensions.conf
+            systemctl restart asterisk
 
 
   RTPGatewayInstance:
