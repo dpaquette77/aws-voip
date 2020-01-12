@@ -11,6 +11,17 @@ Resources:
       ResourceRecords:
         - !GetAtt OpenSipsInstance.PublicIp
 
+
+  MediaInternalDnsRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z0689688U89V3H9GEU9E
+      Name: media.internal
+      Type: A
+      TTL: 60
+      ResourceRecords:
+        - !GetAtt MediaServerInstance.PrivateIp
+
   OpenSipsInstance:
     Type: AWS::EC2::Instance
     Properties:
