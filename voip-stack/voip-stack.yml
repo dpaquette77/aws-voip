@@ -76,7 +76,7 @@ Resources:
   RTPGatewayInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-0ba5191a708339a31
+      ImageId: ami-0f1530cd54203ead9
       InstanceType: t2.micro
       SubnetId: !ImportValue vpc-stack:PublicSubnet1
       KeyName: 2020key
@@ -89,7 +89,7 @@ Resources:
           !Sub |
             #!/bin/bash -xe
             apt-get update -y
-            apt-get -y install rtpproxy
-            systemctl disable rtpproxy
-            systemctl stop rtpproxy
             rtpproxy -l `curl http://169.254.169.254/latest/meta-data/local-ipv4` -s udp:`curl http://169.254.169.254/latest/meta-data/local-ipv4`:7722 -m 10000 -M 30000 -u rtpproxy rtpproxy
+            #/usr/local/bin/rtpproxy -A `curl http://169.254.169.254/latest/meta-data/local-ipv4`/`curl http://169.254.169.254/latest/meta-data/public-ipv4` -l `curl http://169.254.169.254/latest/meta-data/local-ipv4`/127.0.0.1 -m 10000 -M 30000 -u rtpproxy:rtpproxy -s udp:`curl http://169.254.169.254/latest/meta-data/local-ipv4`:7722
+            /usr/local/bin/rtpproxy -A `curl http://169.254.169.254/latest/meta-data/local-ipv4`/`curl http://169.254.169.254/latest/meta-data/public-ipv4` -l `curl http://169.254.169.254/latest/meta-data/local-ipv4`/127.0.0.1 -m 10000 -M 30000 -s udp:`curl http://169.254.169.254/latest/meta-data/local-ipv4`:7722
+
