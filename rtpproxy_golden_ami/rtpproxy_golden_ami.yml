@@ -1,0 +1,33 @@
+---
+Resources:
+
+
+  RtpproxyGoldenInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ba5191a708339a31
+      InstanceType: t2.micro
+      SubnetId: !ImportValue vpc-stack:PublicSubnet1
+      KeyName: 2020key
+      SecurityGroupIds:
+        - !ImportValue security-stack:SSHFromAnywhereSG
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            apt-get update -y
+            (cd /usr/local/src/ && git clone -b master https://github.com/sippy/rtpproxy.git && git -C rtpproxy submodule update --init --recursive && cd rtpproxy && ./configure && make && make install)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
